@@ -1,0 +1,49 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: lilam <marvin@42.fr>                       +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2018/04/17 20:22:30 by lilam             #+#    #+#             */
+/*   Updated: 2018/04/17 21:27:44 by lilam            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "fractol.h"
+#include <stdio.h>
+
+int main()
+{	
+	void *mlx_ptr;
+	void *win_ptr;
+	void *img;
+	int *img_ptr;
+	int bbp;
+	int stride;
+	int endian;
+
+	mlx_ptr = mlx_init();
+	win_ptr = mlx_new_window(mlx_ptr, WIDTH, HEIGHT, "test");
+	img = mlx_new_image(mlx_ptr, WIDTH, HEIGHT);
+	img_ptr = (int *)mlx_get_data_addr(img, &bbp, &stride, &endian);
+	bbp = bbp / 8;
+
+
+	int i = 0;
+	int color = 0xFFFFFF;
+
+	int x;
+	int y;
+
+	x = 100;
+	y = 100;
+	i = x + (y * WIDTH);
+	img_ptr[i] = color;
+	
+	mlx_put_image_to_window(mlx_ptr, win_ptr, img, 0, 0);
+	mlx_key_hook(win_ptr, keys, (void *)0);
+	mlx_loop(mlx_ptr);
+
+	return (0);
+}
