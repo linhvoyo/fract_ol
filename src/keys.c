@@ -13,14 +13,24 @@
 #include "fractol.h"
 #include <stdio.h>
 
-int keys(int key, void *param)
+int keys(int key, t_mlx *mlx)
 {
-	(void)param;
-
 	if (key == 53)
 		exit(EXIT_SUCCESS);
-	
-	printf("%d\n", key);
-	return (0);
-}
+	else if (key == 34)
+		mlx->map->max_iter += 1;
+	else if (key == 6)
+		mlx->map->zoom += 1;
+	else if (key == 7)
+		mlx->map->zoom -= 1;
+	else
+	{
+		printf("%d\n", key);
+		return (0);
 
+	}
+	mandelbrot(mlx);
+	return (1);
+	// printf("%d\n", key);
+	// return (0);
+}

@@ -18,13 +18,13 @@
 # define WIDTH 1280
 # define HEIGHT 750
 
-int keys(int key, void *param);
 
 
 typedef struct	s_map
 {
 	int			scale_factor;
-
+	int			max_iter;
+	int			zoom;
 }				t_map;
 
 typedef struct	s_mlx
@@ -32,11 +32,14 @@ typedef struct	s_mlx
 	void		*mlx_ptr;
 	void		*win_ptr;
 	void		*img;
-	int			*img_ptr;
+	char		*img_ptr;
 	int			bbp;
 	int			stride;
 	int			endian;
 	t_map		*map;
 }				t_mlx;
+
+int keys(int key, t_mlx *mlx);
+void mandelbrot(t_mlx *mlx);
 
 #endif
