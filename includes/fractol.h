@@ -25,6 +25,9 @@ typedef struct	s_map
 	int			scale_factor;
 	int			max_iter;
 	int			zoom;
+	double			offset_x;
+	double			offset_y;
+
 }				t_map;
 
 typedef struct	s_mlx
@@ -41,5 +44,5 @@ typedef struct	s_mlx
 
 int keys(int key, t_mlx *mlx);
 void mandelbrot(t_mlx *mlx);
-
+void  julia(t_mlx *mlx);
 #endif
