@@ -34,6 +34,7 @@ int keys(int key, t_mlx *mlx)
 		mlx->map->max_iter += 1;
 	else if (key == 6)
 	{
+		mlx->map->zoom_inc = mlx->map->zoom * 1;
 		mlx->map->zoom += mlx->map->zoom * 1;
 		printf("%f\n",mlx->map->zoom);
 		// int n = mlx->map->max_iter / 100;
@@ -47,7 +48,7 @@ int keys(int key, t_mlx *mlx)
 	}
 	else if (key == 7)
 	{
-		mlx->map->zoom -= mlx->map->zoom * 1;
+		mlx->map->zoom -= mlx->map->zoom_inc;
 		// mlx->map->max_iter += 5;
 	}
 	else if (key >= 123 && key <= 126)
@@ -60,13 +61,35 @@ int keys(int key, t_mlx *mlx)
 	{
 		printf("%d\n", key);
 		return (0);
-
 	}
 	if (mlx->map->fractol == 1)
 		mandelbrot(mlx);
 	else if (mlx->map->fractol == 2)
 		julia(mlx);
+	else if (mlx->map->fractol == 3)
+		burning_ship(mlx);
 	return (1);
 	// printf("%d\n", key);
 	// return (0);
+}
+
+
+int	mouse(int mouse, int x, int y, t_mlx *mlx)
+{
+	(void)x;
+	(void)y;
+	if (mouse == 5)
+		mlx->map->j_c_re += 0.1;
+	else if (mouse == 4)
+		mlx->map->j_c_re -= 0.1;
+	else if (mouse == 1)
+		mlx->map->j_c_im += 0.1;
+	else if (mouse == 2)
+		mlx->map->j_c_im -= 0.1;
+	else
+		return (0);
+
+	if (mlx->map->fractol == 2)
+		julia(mlx);
+	return (1);
 }

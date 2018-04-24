@@ -12,6 +12,7 @@
 
 #include "fractol.h"
 #include <stdio.h>
+#include <math.h>
 
 t_mlx	*init_mlx(char *str, double offset_x, int fractol)
 {
@@ -61,18 +62,9 @@ void test_put_pixel(t_mlx *mlx, int x, int y, int n)
 	mlx->img_ptr[++i] = n % 255;
 }
 
-void  julia(t_mlx *mlx)
+void julia(t_mlx *mlx)
 {
-	// double c_re, c_im;
 	double new_re, new_im, old_re, old_im;
-
-
-
-
-	// c_re = -0.7;
-	// c_im = 0.27015;
-
-
 	int x;
 	int y = 0;
 	int i;
@@ -153,29 +145,77 @@ void mandelbrot(t_mlx *mlx)
 
 
 
+
+void burning_ship(t_mlx *mlx)
+{
+
+	double pr, pi;
+	double new_re, new_im, old_re, old_im;
+	ft_bzero(mlx->img_ptr, WIDTH * HEIGHT * mlx->bbp);
+	printf("max_iter %d zoom %f color %d\n", mlx->map->max_iter, mlx->map->zoom, mlx->map->color);
+	if (mlx->map->zoom < 1)
+		mlx->map->zoom = 1;
+	int y = 0;
+	while (y < HEIGHT)
+	{
+		int x = 0;
+		while (x < WIDTH)
+		{
+			pr = 1.5 *(x - WIDTH / 2) / (0.25 * mlx->map->zoom * WIDTH) + mlx->map->offset_x;
+			pi = (y - HEIGHT / 2) / (0.25 * mlx->map->zoom * HEIGHT) + mlx->map->offset_y;
+			new_re = 0;
+			new_im = 0;
+			old_re = 0;
+			old_im = 0;
+			int i = 0;
+			while (i < mlx->map->max_iter)
+			{
+				old_re = new_re;
+				old_im = new_im;
+				new_re = old_re * old_re - old_im * old_im + pr;
+				new_im = 2 * fabs(old_re * old_im) + pi;
+				if ((new_re * new_re + new_im * new_im) > 4)
+					break;
+					i++;
+			}
+			if (i < mlx->map->max_iter)
+				test_put_pixel(mlx, x, y, 265 * i);
+			x++;
+		}
+		y++;
+	}
+	mlx_put_image_to_window(mlx->mlx_ptr, mlx->win_ptr, mlx->img, 0, 0);
+}
+
+void print_error()
+{
+	ft_putstr("usage: ./fractol <image>\n\n");
+	ft_putstr("--images:\n\tmandelbrot\n\tjulia\n\tburningship\n");
+}
 int main(int argc, char **argv)
 {
 	t_mlx	*mlx;
 	(void)argc;
-	// mlx = init_mlx("hello");
 
-	printf("%s\n", argv[1]);
-
-
+	if (argc != 2)
+	{
+		print_error();
+		return (0);
+	}
 	if ((ft_strcmp(argv[1],"mandelbrot") == 0) && (mlx = init_mlx(argv[1], -0.5, 1)))
 		mandelbrot(mlx);
 	else if ((ft_strcmp(argv[1],"julia") == 0) && (mlx = init_mlx(argv[1], 0, 2)))
 		julia(mlx);
+	else if ((ft_strcmp(argv[1],"burningship") == 0) && (mlx = init_mlx(argv[1], 0, 3)))
+		burning_ship(mlx);
 	else
+	{
+		print_error();
 		return(0);
+	}
 
-
-	//
-	// put_pixel(mlx->img_ptr, 100, 100, 0xFF00FF);
-	//
-	// test_put_pixel(mlx, 100, 100, 1);
 	mlx_key_hook(mlx->win_ptr, keys, mlx);
-	// mlx_put_image_to_window(mlx->mlx_ptr, mlx->win_ptr, mlx->img, 0, 0);
+	mlx_mouse_hook(mlx->win_ptr, mouse, mlx);
 	mlx_loop(mlx->mlx_ptr);
 	return (0);
 }

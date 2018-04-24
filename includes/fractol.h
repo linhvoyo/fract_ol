@@ -31,6 +31,9 @@ typedef struct	s_map
 	double		j_c_re;
 	double		j_c_im;
 	int			fractol;
+	int			x;
+	int			y;
+	double		zoom_inc;
 }				t_map;
 
 typedef struct	s_mlx
@@ -47,5 +50,7 @@ typedef struct	s_mlx
 
 int keys(int key, t_mlx *mlx);
 void mandelbrot(t_mlx *mlx);
-void  julia(t_mlx *mlx);
+void burning_ship(t_mlx *mlx);
+void julia(t_mlx *mlx);
+int	mouse(int mouse, int x, int y, t_mlx *mlx);
 #endif
