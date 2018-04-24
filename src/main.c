@@ -13,7 +13,7 @@
 #include "fractol.h"
 #include <stdio.h>
 
-t_mlx	*init_mlx(char *str)
+t_mlx	*init_mlx(char *str, double offset_x, int fractol)
 {
 	t_mlx *tmp;
 	tmp = malloc(sizeof(t_mlx));
@@ -29,8 +29,12 @@ t_mlx	*init_mlx(char *str)
 		return (NULL);
 	tmp->map->max_iter = 50;
 	tmp->map->zoom = 1;
-	tmp->map->offset_x = -0.5 ;
+	tmp->map->offset_x = offset_x;
 	tmp->map->offset_y = 0 ;
+	tmp->map->color = 1;
+	tmp->map->j_c_re = -0.7;
+	tmp->map->j_c_im = 0.27015;
+	tmp->map->fractol = fractol;
 	return (tmp);
 }
 
@@ -52,49 +56,44 @@ void test_put_pixel(t_mlx *mlx, int x, int y, int n)
 
 	mlx->img_ptr[i] = 255 * n;
 
-	mlx->img_ptr[++i] = 0 + n;
+	mlx->img_ptr[++i] = 0 + (n * mlx->map->color);
 
 	mlx->img_ptr[++i] = n % 255;
 }
 
 void  julia(t_mlx *mlx)
 {
-	double c_re, c_im;
+	// double c_re, c_im;
 	double new_re, new_im, old_re, old_im;
 
-	double zoom = 1;
-	double movex = 0;
-	double movey = 0;
 
 
 
-	c_re = -0.7;
-	c_im = 0.27015;
+	// c_re = -0.7;
+	// c_im = 0.27015;
 
 
 	int x;
 	int y = 0;
 	int i;
 
-	printf("max_iter %d zoom %d\n", mlx->map->max_iter, mlx->map->zoom);
-
+	ft_bzero(mlx->img_ptr, WIDTH * HEIGHT * mlx->bbp);
+	printf("max_iter %d zoom %f color %d\n", mlx->map->max_iter, mlx->map->zoom, mlx->map->color);
 	while (y < HEIGHT)
 	{
 		x = 0;
 		while (x < WIDTH)
 		{
-			new_re = 1.5 * (x - WIDTH / 2) / (0.5 * zoom * WIDTH) + movex;
-			new_im = (y - HEIGHT / 2) / (0.5 * zoom * HEIGHT) + movey;
-
+			new_re = 1.5 * (x - WIDTH / 2) / (0.5 * mlx->map->zoom * WIDTH) + mlx->map->offset_x;
+			new_im = (y - HEIGHT / 2) / (0.5 * mlx->map->zoom * HEIGHT) + mlx->map->offset_y;
 			i = 0;
-
 			while (i < mlx->map->max_iter)
 			{
 				old_re = new_re;
 				old_im = new_im;
 
-				new_re = old_re * old_re - old_im * old_im + c_re;
-				new_im = 2 * old_re * old_im + c_im;
+				new_re = old_re * old_re - old_im * old_im + mlx->map->j_c_re;
+				new_im = 2 * old_re * old_im + mlx->map->j_c_im;
 
 				if ((new_re * new_re + new_im * new_im) > 4)
 					break;
@@ -116,17 +115,10 @@ void mandelbrot(t_mlx *mlx)
 
 	double pr, pi;
 	double new_re, new_im, old_re, old_im;
-
-
-
-
-
 	ft_bzero(mlx->img_ptr, WIDTH * HEIGHT * mlx->bbp);
-	printf("max_iter %d zoom %d\n", mlx->map->max_iter, mlx->map->zoom);
-
+	printf("max_iter %d zoom %f color %d\n", mlx->map->max_iter, mlx->map->zoom, mlx->map->color);
 	if (mlx->map->zoom < 1)
 		mlx->map->zoom = 1;
-
 	int y = 0;
 	while (y < HEIGHT)
 	{
@@ -139,51 +131,44 @@ void mandelbrot(t_mlx *mlx)
 			new_im = 0;
 			old_re = 0;
 			old_im = 0;
-
 			int i = 0;
 			while (i < mlx->map->max_iter)
 			{
 				old_re = new_re;
 				old_im = new_im;
-
 				new_re = old_re * old_re - old_im * old_im + pr;
 				new_im = 2 * old_re * old_im + pi;
 				if ((new_re * new_re + new_im * new_im) > 4)
 					break;
 					i++;
 			}
-			// printf("x: %d y: %d\n", x , y);
 			if (i < mlx->map->max_iter)
 				test_put_pixel(mlx, x, y, 265 * i);
-			// if (i == mlx->map->max_iter)
-			// 	test_put_pixel(mlx, x, y, 1);
-			// else
-			// 	test_put_pixel(mlx, x, y, 265 * i);
 			x++;
 		}
-			// printf("x: %d y: %d\n", x , y);
-			// put_pixel(img_ptr, x, y, color);
 		y++;
 	}
-
-
-//	}
 	mlx_put_image_to_window(mlx->mlx_ptr, mlx->win_ptr, mlx->img, 0, 0);
-
 }
 
 
 
-int main()
+int main(int argc, char **argv)
 {
 	t_mlx	*mlx;
+	(void)argc;
+	// mlx = init_mlx("hello");
 
-	mlx = init_mlx("hello");
+	printf("%s\n", argv[1]);
 
-	printf("wetwer\n");
 
-	mandelbrot(mlx);
-	// julia(mlx);
+	if ((ft_strcmp(argv[1],"mandelbrot") == 0) && (mlx = init_mlx(argv[1], -0.5, 1)))
+		mandelbrot(mlx);
+	else if ((ft_strcmp(argv[1],"julia") == 0) && (mlx = init_mlx(argv[1], 0, 2)))
+		julia(mlx);
+	else
+		return(0);
+
 
 	//
 	// put_pixel(mlx->img_ptr, 100, 100, 0xFF00FF);

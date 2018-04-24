@@ -24,10 +24,13 @@ typedef struct	s_map
 {
 	int			scale_factor;
 	int			max_iter;
-	int			zoom;
-	double			offset_x;
-	double			offset_y;
-
+	double		zoom;
+	double		offset_x;
+	double		offset_y;
+	int			color;
+	double		j_c_re;
+	double		j_c_im;
+	int			fractol;
 }				t_map;
 
 typedef struct	s_mlx
