@@ -134,10 +134,11 @@ void* mandelbrot_set(void* img)
 }
 
 
-void print_error()
+int print_error()
 {
 	ft_putstr("usage: ./fractol <image>\n\n");
 	ft_putstr("--images:\n\tmandelbrot\n\tjulia\n\tburningship\n");
+	return (0);
 }
 
 void pthread(t_mlx *mlx)
@@ -159,9 +160,8 @@ void pthread(t_mlx *mlx)
 			pthread_create(&tid[i], NULL, mandelbrot_set, &win[i]);
 		else if (mlx->map->fractol == 2)
 			pthread_create(&tid[i], NULL, julia, &win[i]);
-	i = 0;
-	while (i < 4)
-		pthread_join(tid[i++], NULL);
+	while (--i >= 0)
+		pthread_join(tid[i], NULL);
 	mlx_put_image_to_window(mlx->mlx_ptr, mlx->win_ptr, mlx->img, 0, 0);
 }
 
@@ -170,23 +170,17 @@ int main(int argc, char **argv)
 	t_mlx	*mlx;
 
 	if (argc != 2)
-	{
-		print_error();
-		return (0);
-	}
-	if ((ft_strcmp(argv[1],"mandelbrot") == 0) && (mlx = init_mlx(argv[1], 0, 1)))
-		pthread(mlx);
-	else if ((ft_strcmp(argv[1],"julia") == 0) && (mlx = init_mlx(argv[1], 0, 2)))
-		pthread(mlx);
-	else if ((ft_strcmp(argv[1],"burningship") == 0) && (mlx = init_mlx(argv[1], 0, 3)))
-		pthread(mlx);
+		return (print_error());
+	if ((ft_strcmp(argv[1],"mandelbrot") == 0))
+		mlx = init_mlx(argv[1], 0, 1);
+	else if ((ft_strcmp(argv[1],"julia") == 0))
+		mlx = init_mlx(argv[1], 0, 2);
+	else if ((ft_strcmp(argv[1],"burningship") == 0))
+		mlx = init_mlx(argv[1], 0, 3);
 	else
-	{
-		print_error();
-		return(0);
-	}
+		return(print_error());
 
-
+	pthread(mlx);
 	mlx_key_hook(mlx->win_ptr, keys, mlx);
 	mlx_mouse_hook(mlx->win_ptr, mouse, mlx);
 	mlx_loop(mlx->mlx_ptr);
