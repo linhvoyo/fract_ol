@@ -79,7 +79,9 @@ int keys(int key, t_mlx *mlx)
 int motion_hook(int x, int y, t_mlx *mlx)
 {
 	printf("x: %d y:%d \n", x, y);
-	(void)mlx;
+	mlx->mouse_x = x;
+    mlx->mouse_y = y;
+    pthread(mlx);
 	return (0);
 }
 

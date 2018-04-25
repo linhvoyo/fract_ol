@@ -74,8 +74,8 @@ void* julia(void *img)
 			{
 				old_re = new_re;
 				old_im = new_im;
-				new_re = old_re * old_re - old_im * old_im + mlx->map->j_c_re;
-				new_im = 2 * old_re * old_im + mlx->map->j_c_im;
+				new_re = old_re * old_re - old_im * old_im + (mlx->map->j_c_re * mlx->mouse_x / 100);
+				new_im = 2 * old_re * old_im + (mlx->map->j_c_im * mlx->mouse_y / 100);
 				if ((new_re * new_re + new_im * new_im) > 4)
 					break;
 				i++;

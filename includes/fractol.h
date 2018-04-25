@@ -47,6 +47,8 @@ typedef struct	s_mlx
 	int			start;
 	int			end;
 	int			ctrl;
+    int         mouse_x;
+    int         mouse_y;
 }				t_mlx;
 
 int key_down(int key, t_mlx *mlx);
