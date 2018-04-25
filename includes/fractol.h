@@ -46,12 +46,17 @@ typedef struct	s_mlx
 	t_map		*map;
 	int			start;
 	int			end;
+	int			ctrl;
 }				t_mlx;
 
-int keys(int key, t_mlx *mlx);
+int key_down(int key, t_mlx *mlx);
 void* mandelbrot_set(void *img);
 void* burning_ship(void *img);
 void* julia(void *img);
 void pthread(t_mlx *mlx);
 int	mouse(int mouse, int x, int y, t_mlx *mlx);
+// int key_hold(int key, t_mlx *mlx);
+
+int keys(int key, t_mlx *mlx);
+int motion_hook(int mouse, int x, t_mlx *mlx);
 #endif

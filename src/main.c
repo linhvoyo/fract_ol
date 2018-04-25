@@ -32,7 +32,7 @@ t_mlx	*init_mlx(char *str, double offset_x, int fractol)
 	if (!(tmp->map = malloc(sizeof(t_map))))
 		return (NULL);
 	tmp->map->max_iter = 50;
-	tmp->map->zoom = 1;
+	tmp->map->zoom = 0.25;
 	tmp->map->offset_x = offset_x;
 	tmp->map->offset_y = 0 ;
 	tmp->map->color = 1;
@@ -96,8 +96,6 @@ void* mandelbrot_set(void* img)
 	double pr, pi;
 	double new_re, new_im, old_re, old_im;
 	printf("max_iter %d zoom %f color %d\n", mlx->map->max_iter, mlx->map->zoom, mlx->map->color);
-	if (mlx->map->zoom < 1)
-		mlx->map->zoom = 1;
 	int y = mlx->start;
 	while (y < mlx->end)
 	{
@@ -147,7 +145,9 @@ void pthread(t_mlx *mlx)
 	t_mlx win[4];
 	pthread_t tid[4];
 
+	printf("mlx _ctr %d\n", mlx->ctrl);
 	ft_bzero(mlx->img_ptr, WIDTH * HEIGHT * mlx->bbp);
+	mlx->map->zoom = fabs(mlx->map->zoom);
 	i = -1;
 	while (++i < 4 && (ft_memcpy((void*)&win[i], mlx, sizeof(t_mlx))))
 	{
@@ -182,6 +182,8 @@ int main(int argc, char **argv)
 
 	pthread(mlx);
 	mlx_key_hook(mlx->win_ptr, keys, mlx);
+	mlx_hook(mlx->win_ptr, 2, 0, key_down, mlx);
+	mlx_hook(mlx->win_ptr, 6, 0, motion_hook, mlx);
 	mlx_mouse_hook(mlx->win_ptr, mouse, mlx);
 	mlx_loop(mlx->mlx_ptr);
 	return (0);
