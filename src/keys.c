@@ -16,13 +16,13 @@
 
 void	shift_img(t_mlx *mlx, int key)
 {
-	if (key == 126)
+	if (key == 125)
 		mlx->map->offset_y -= 0.05/mlx->map->zoom;
-	else if (key == 125)
+	else if (key == 126)
 		mlx->map->offset_y += 0.05/mlx->map->zoom;
-	else if (key == 123)
-		mlx->map->offset_x -= 0.05/mlx->map->zoom;
 	else if (key == 124)
+		mlx->map->offset_x -= 0.05/mlx->map->zoom;
+	else if (key == 123)
 		mlx->map->offset_x += 0.05/mlx->map->zoom;
 }
 
@@ -62,12 +62,7 @@ int keys(int key, t_mlx *mlx)
 		printf("%d\n", key);
 		return (0);
 	}
-	if (mlx->map->fractol == 1)
-		mandelbrot(mlx);
-	else if (mlx->map->fractol == 2)
-		julia(mlx);
-	else if (mlx->map->fractol == 3)
-		burning_ship(mlx);
+	pthread(mlx);
 	return (1);
 	// printf("%d\n", key);
 	// return (0);
@@ -88,8 +83,7 @@ int	mouse(int mouse, int x, int y, t_mlx *mlx)
 		mlx->map->j_c_im -= 0.1;
 	else
 		return (0);
-
 	if (mlx->map->fractol == 2)
-		julia(mlx);
+		pthread(mlx);
 	return (1);
 }

@@ -16,7 +16,7 @@
 # include "libft.h"
 
 # define WIDTH 1280
-# define HEIGHT 750
+# define HEIGHT 800
 
 
 
@@ -31,8 +31,6 @@ typedef struct	s_map
 	double		j_c_re;
 	double		j_c_im;
 	int			fractol;
-	int			x;
-	int			y;
 	double		zoom_inc;
 }				t_map;
 
@@ -46,11 +44,14 @@ typedef struct	s_mlx
 	int			stride;
 	int			endian;
 	t_map		*map;
+	int			start;
+	int			end;
 }				t_mlx;
 
 int keys(int key, t_mlx *mlx);
-void mandelbrot(t_mlx *mlx);
-void burning_ship(t_mlx *mlx);
-void julia(t_mlx *mlx);
+void* mandelbrot_set(void *img);
+void* burning_ship(void *img);
+void* julia(void *img);
+void pthread(t_mlx *mlx);
 int	mouse(int mouse, int x, int y, t_mlx *mlx);
 #endif
