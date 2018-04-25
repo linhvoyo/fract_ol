@@ -142,38 +142,25 @@ void print_error()
 
 void pthread(t_mlx *mlx)
 {
-	int start;
-	int n_threads;
 	int i;
-
-
-	n_threads = 4;
-	start = (HEIGHT / 4);
-	i = 0;
-
-
-	t_mlx win[n_threads];
-	pthread_t tid[n_threads];
+	t_mlx win[4];
+	pthread_t tid[4];
 
 	ft_bzero(mlx->img_ptr, WIDTH * HEIGHT * mlx->bbp);
-	while(i<n_threads)
+	i = -1;
+	while (++i < 4 && (ft_memcpy((void*)&win[i], mlx, sizeof(t_mlx))))
 	{
-		ft_memcpy((void*)&win[i], mlx, sizeof(t_mlx));
-		win[i].start = i * start;
-		win[i].end = (i + 1) * start;
-		i++;
+		win[i].start = i * 200;
+		win[i].end = (i + 1) * 200;
 	}
-	i = 0;
-	while(i < n_threads)
-	{
+	i = -1;
+	while(++i < 4)
 		if (mlx->map->fractol == 1 || mlx->map->fractol == 3)
 			pthread_create(&tid[i], NULL, mandelbrot_set, &win[i]);
 		else if (mlx->map->fractol == 2)
 			pthread_create(&tid[i], NULL, julia, &win[i]);
-		i++;
-	}
 	i = 0;
-	while (i < n_threads)
+	while (i < 4)
 		pthread_join(tid[i++], NULL);
 	mlx_put_image_to_window(mlx->mlx_ptr, mlx->win_ptr, mlx->img, 0, 0);
 }
