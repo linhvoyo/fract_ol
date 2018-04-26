@@ -6,7 +6,7 @@
 /*   By: lilam <marvin@42.fr>                       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/04/17 20:22:30 by lilam             #+#    #+#             */
-/*   Updated: 2018/04/17 22:10:01 by lilam            ###   ########.fr       */
+/*   Updated: 2018/04/25 22:19:09 by lilam            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,14 +15,14 @@
 t_mlx	*init_mlx(char *str, double offset_x, int fractol)
 {
 	t_mlx *tmp;
-	tmp = malloc(sizeof(t_mlx));
 
-	if (!tmp)
+	if (!(tmp = malloc(sizeof(t_mlx))))
 		return (NULL);
 	tmp->mlx_ptr = mlx_init();
 	tmp->win_ptr = mlx_new_window(tmp->mlx_ptr, WIDTH, HEIGHT, str);
 	tmp->img = mlx_new_image(tmp->mlx_ptr, WIDTH, HEIGHT);
-	tmp->img_ptr = mlx_get_data_addr(tmp->img, &tmp->bbp, &tmp->stride, &tmp->endian);
+	tmp->img_ptr = mlx_get_data_addr(tmp->img, &tmp->bbp,
+			&tmp->stride, &tmp->endian);
 	tmp->bbp /= 8;
 	tmp->start = 0;
 	tmp->end = HEIGHT;
@@ -32,18 +32,17 @@ t_mlx	*init_mlx(char *str, double offset_x, int fractol)
 	tmp->map->max_iter = 50;
 	tmp->map->zoom = 1;
 	tmp->map->offset_x = offset_x;
-	tmp->map->offset_y = 0 ;
+	tmp->map->offset_y = 0;
 	tmp->map->color = 1;
 	tmp->map->fractol = fractol;
 	return (tmp);
 }
 
-
-void put_pixel(t_mlx *mlx, int x, int y, int n)
+void	put_pixel(t_mlx *mlx, int x, int y, int n)
 {
 	int i;
 
-	n =n + 0;
+	n = n + 0;
 	if (x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT)
 		return ;
 	i = (x * 4) + (y * mlx->stride);
@@ -52,10 +51,16 @@ void put_pixel(t_mlx *mlx, int x, int y, int n)
 	mlx->img_ptr[++i] = n % 255;
 }
 
-void* julia(void *img)
+void*	julia(void *img)
 {
-	t_mlx *mlx = (t_mlx *)img;
-	double new_re, new_im, old_re, old_im;
+	t_mlx *mlx;
+	double new_re;
+	double new_im;
+	double old_re;
+	double old_im;
+
+	mlx = (t_mlx *)img;
+	//double new_re, new_im, old_re, old_im;
 	while (mlx->start < mlx->end)
 	{
 		int x = 0;
@@ -128,7 +133,7 @@ void* mandelbrot_set(void* img)
 }
 
 
-int print_error()
+int print()
 {
 	ft_putstr("usage: ./fractol <image>\n\n");
 	ft_putstr("--images:\n\tmandelbrot\n\tjulia\n\tburningship\n\tdulia\n");
@@ -138,6 +143,7 @@ int print_error()
 void pthread(t_mlx *mlx)
 {
 	int i;
+	char *str;
 	t_mlx win[4];
 	pthread_t tid[4];
 
@@ -158,9 +164,11 @@ void pthread(t_mlx *mlx)
 		pthread_join(tid[i], NULL);
 	mlx_put_image_to_window(mlx->mlx_ptr, mlx->win_ptr, mlx->img, 0, 0);
 	mlx_string_put(mlx->mlx_ptr, mlx->win_ptr, 10, 10, 0xffffff, "iter:");
-	mlx_string_put(mlx->mlx_ptr, mlx->win_ptr, 110, 10, 0xffffff, ft_itoa(mlx->map->max_iter));
+	mlx_string_put(mlx->mlx_ptr, mlx->win_ptr, 110, 10, 0xffffff, str = ft_itoa(mlx->map->max_iter));
+	free(str);
 	mlx_string_put(mlx->mlx_ptr, mlx->win_ptr, 10, 40, 0xffffff, "zoom:");
-	mlx_string_put(mlx->mlx_ptr, mlx->win_ptr, 110, 40, 0xffffff, ft_itoa(mlx->map->zoom));
+	mlx_string_put(mlx->mlx_ptr, mlx->win_ptr, 110, 40, 0xffffff, str = ft_itoa(mlx->map->zoom));
+	free(str);
 }
 
 int main(int argc, char **argv)
@@ -168,7 +176,7 @@ int main(int argc, char **argv)
 	t_mlx	*mlx;
 
 	if (argc != 2)
-		return (print_error());
+		return (print());
 	if ((ft_strcmp(argv[1],"mandelbrot") == 0))
 		mlx = init_mlx(argv[1], 0, 1);
 	else if ((ft_strcmp(argv[1],"julia") == 0))
@@ -178,7 +186,7 @@ int main(int argc, char **argv)
 	else if ((ft_strcmp(argv[1],"dulia") == 0))
 		mlx = init_mlx(argv[1], 0, 4);
 	else
-		return (print_error());
+		return (print());
 	pthread(mlx);
 	mlx_hook(mlx->win_ptr, 2, 0, key_down, mlx);
 	mlx_hook(mlx->win_ptr, 6, 0, motion_hook, mlx);
