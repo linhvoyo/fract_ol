@@ -46,8 +46,9 @@ typedef struct	s_mlx
 	t_map		*map;
 	int			start;
 	int			end;
-    double      mouse_x;
-    double      mouse_y;
+  double      mouse_x;
+  double      mouse_y;
+	int			error;
 }				t_mlx;
 
 int key_down(int key, t_mlx *mlx);

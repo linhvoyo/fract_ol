@@ -26,6 +26,7 @@ t_mlx	*init_mlx(char *str, double offset_x, int fractol)
 	tmp->bbp /= 8;
 	tmp->start = 0;
 	tmp->end = HEIGHT;
+	tmp->error = 1;
 	if (!(tmp->map = malloc(sizeof(t_map))))
 		return (NULL);
 	tmp->map->max_iter = 50;
@@ -60,8 +61,8 @@ void* julia(void *img)
 		int x = 0;
 		while (x < WIDTH)
 		{
-			new_re = 1.5 * (x - 650) / (0.5 * mlx->map->zoom * WIDTH) + mlx->map->offset_x;
-			new_im = (mlx->start - 400) / (0.5 * mlx->map->zoom * HEIGHT) + mlx->map->offset_y;
+			new_re = 1.5 * (x - 650) / (0.125 * mlx->map->zoom * WIDTH) + mlx->map->offset_x;
+			new_im = (mlx->start - 400) / (0.125 * mlx->map->zoom * HEIGHT) + mlx->map->offset_y;
 			int i = 0;
 			while (i < mlx->map->max_iter)
 			{
@@ -156,6 +157,10 @@ void pthread(t_mlx *mlx)
 	while (--i >= 0)
 		pthread_join(tid[i], NULL);
 	mlx_put_image_to_window(mlx->mlx_ptr, mlx->win_ptr, mlx->img, 0, 0);
+	mlx_string_put(mlx->mlx_ptr, mlx->win_ptr, 10, 10, 0xffffff, "iter:");
+	mlx_string_put(mlx->mlx_ptr, mlx->win_ptr, 110, 10, 0xffffff, ft_itoa(mlx->map->max_iter));
+	mlx_string_put(mlx->mlx_ptr, mlx->win_ptr, 10, 40, 0xffffff, "zoom:");
+	mlx_string_put(mlx->mlx_ptr, mlx->win_ptr, 110, 40, 0xffffff, ft_itoa(mlx->map->zoom));
 }
 
 int main(int argc, char **argv)
@@ -173,7 +178,7 @@ int main(int argc, char **argv)
 	else if ((ft_strcmp(argv[1],"dulia") == 0))
 		mlx = init_mlx(argv[1], 0, 4);
 	else
-		return(print_error());
+		return (print_error());
 	pthread(mlx);
 	mlx_hook(mlx->win_ptr, 2, 0, key_down, mlx);
 	mlx_hook(mlx->win_ptr, 6, 0, motion_hook, mlx);
