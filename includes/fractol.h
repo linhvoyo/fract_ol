@@ -14,6 +14,8 @@
 # define FRACTOL_H
 # include "mlx.h"
 # include "libft.h"
+# include <math.h>
+# include <pthread.h>
 
 # define WIDTH 1280
 # define HEIGHT 800
@@ -28,8 +30,6 @@ typedef struct	s_map
 	double		offset_x;
 	double		offset_y;
 	int			color;
-	double		j_c_re;
-	double		j_c_im;
 	int			fractol;
 	double		zoom_inc;
 }				t_map;
@@ -46,19 +46,15 @@ typedef struct	s_mlx
 	t_map		*map;
 	int			start;
 	int			end;
-	int			ctrl;
-    int         mouse_x;
-    int         mouse_y;
+    double      mouse_x;
+    double      mouse_y;
 }				t_mlx;
 
 int key_down(int key, t_mlx *mlx);
 void* mandelbrot_set(void *img);
-void* burning_ship(void *img);
 void* julia(void *img);
 void pthread(t_mlx *mlx);
 int	mouse(int mouse, int x, int y, t_mlx *mlx);
-// int key_hold(int key, t_mlx *mlx);
-
 int keys(int key, t_mlx *mlx);
 int motion_hook(int mouse, int x, t_mlx *mlx);
 #endif

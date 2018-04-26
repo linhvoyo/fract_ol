@@ -11,9 +11,6 @@
 /* ************************************************************************** */
 
 #include "fractol.h"
-#include <stdio.h>
-#include <math.h>
-#include <pthread.h>
 
 t_mlx	*init_mlx(char *str, double offset_x, int fractol)
 {
@@ -32,12 +29,10 @@ t_mlx	*init_mlx(char *str, double offset_x, int fractol)
 	if (!(tmp->map = malloc(sizeof(t_map))))
 		return (NULL);
 	tmp->map->max_iter = 50;
-	tmp->map->zoom = 0.25;
+	tmp->map->zoom = 1;
 	tmp->map->offset_x = offset_x;
 	tmp->map->offset_y = 0 ;
 	tmp->map->color = 1;
-	tmp->map->j_c_re = -0.7;
-	tmp->map->j_c_im = 0.27015;
 	tmp->map->fractol = fractol;
 	return (tmp);
 }
@@ -60,31 +55,32 @@ void* julia(void *img)
 {
 	t_mlx *mlx = (t_mlx *)img;
 	double new_re, new_im, old_re, old_im;
-	int y = mlx->start;
-	printf("max_iter %d zoom %f color %d\n", mlx->map->max_iter, mlx->map->zoom, mlx->map->color);
-	while (y < mlx->end)
+	while (mlx->start < mlx->end)
 	{
 		int x = 0;
 		while (x < WIDTH)
 		{
-			new_re = 1.5 * (x - WIDTH / 2) / (0.5 * mlx->map->zoom * WIDTH) + mlx->map->offset_x;
-			new_im = (y - HEIGHT / 2) / (0.5 * mlx->map->zoom * HEIGHT) + mlx->map->offset_y;
+			new_re = 1.5 * (x - 650) / (0.5 * mlx->map->zoom * WIDTH) + mlx->map->offset_x;
+			new_im = (mlx->start - 400) / (0.5 * mlx->map->zoom * HEIGHT) + mlx->map->offset_y;
 			int i = 0;
 			while (i < mlx->map->max_iter)
 			{
 				old_re = new_re;
 				old_im = new_im;
-				new_re = old_re * old_re - old_im * old_im + (mlx->map->j_c_re * mlx->mouse_x / 100);
-				new_im = 2 * old_re * old_im + (mlx->map->j_c_im * mlx->mouse_y / 100);
+				new_re = old_re * old_re - old_im * old_im + (-0.7 * mlx->mouse_x / 300);
+				if (mlx->map->fractol == 4)
+					new_im = fabs(2 * old_re * old_im) + (0.27015 * mlx->mouse_y / 300);
+				else if (mlx->map->fractol == 2)
+					new_im = 2 * old_re * old_im + (0.27015 * mlx->mouse_y / 300);
 				if ((new_re * new_re + new_im * new_im) > 4)
 					break;
 				i++;
 			}
 			if (i < mlx->map->max_iter)
-				put_pixel(mlx, x, y, 265 * i);
+				put_pixel(mlx, x, mlx->start, 265 * i);
 			x++;
 		}
-		y++;
+		mlx->start++;
 	}
 	return (NULL);
 }
@@ -95,7 +91,6 @@ void* mandelbrot_set(void* img)
 	t_mlx *mlx = (t_mlx *)img;
 	double pr, pi;
 	double new_re, new_im, old_re, old_im;
-	printf("max_iter %d zoom %f color %d\n", mlx->map->max_iter, mlx->map->zoom, mlx->map->color);
 	int y = mlx->start;
 	while (y < mlx->end)
 	{
@@ -135,7 +130,7 @@ void* mandelbrot_set(void* img)
 int print_error()
 {
 	ft_putstr("usage: ./fractol <image>\n\n");
-	ft_putstr("--images:\n\tmandelbrot\n\tjulia\n\tburningship\n");
+	ft_putstr("--images:\n\tmandelbrot\n\tjulia\n\tburningship\n\tdulia\n");
 	return (0);
 }
 
@@ -145,9 +140,7 @@ void pthread(t_mlx *mlx)
 	t_mlx win[4];
 	pthread_t tid[4];
 
-	printf("mlx _ctr %d\n", mlx->ctrl);
 	ft_bzero(mlx->img_ptr, WIDTH * HEIGHT * mlx->bbp);
-	mlx->map->zoom = fabs(mlx->map->zoom);
 	i = -1;
 	while (++i < 4 && (ft_memcpy((void*)&win[i], mlx, sizeof(t_mlx))))
 	{
@@ -158,7 +151,7 @@ void pthread(t_mlx *mlx)
 	while(++i < 4)
 		if (mlx->map->fractol == 1 || mlx->map->fractol == 3)
 			pthread_create(&tid[i], NULL, mandelbrot_set, &win[i]);
-		else if (mlx->map->fractol == 2)
+		else if (mlx->map->fractol == 2 || mlx->map->fractol == 4)
 			pthread_create(&tid[i], NULL, julia, &win[i]);
 	while (--i >= 0)
 		pthread_join(tid[i], NULL);
@@ -177,11 +170,11 @@ int main(int argc, char **argv)
 		mlx = init_mlx(argv[1], 0, 2);
 	else if ((ft_strcmp(argv[1],"burningship") == 0))
 		mlx = init_mlx(argv[1], 0, 3);
+	else if ((ft_strcmp(argv[1],"dulia") == 0))
+		mlx = init_mlx(argv[1], 0, 4);
 	else
 		return(print_error());
-
 	pthread(mlx);
-	mlx_key_hook(mlx->win_ptr, keys, mlx);
 	mlx_hook(mlx->win_ptr, 2, 0, key_down, mlx);
 	mlx_hook(mlx->win_ptr, 6, 0, motion_hook, mlx);
 	mlx_mouse_hook(mlx->win_ptr, mouse, mlx);
