@@ -6,11 +6,14 @@
 /*   By: lilam <marvin@42.fr>                       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/04/17 20:22:30 by lilam             #+#    #+#             */
-/*   Updated: 2018/04/25 22:19:09 by lilam            ###   ########.fr       */
+/*   Updated: 2018/04/26 00:00:08 by lilam            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "fractol.h"
+#define VS t_mlx *mlx=(t_mlx *)img; int x,i; double c[4]; t_map *map=mlx->map
+#define MS int x,i; t_mlx *mlx = (t_mlx *)img; double c[6];
+#define INIT c[2] = 0; c[3] = 0; c[4] = 0; c[5] = 0;
 
 t_mlx	*init_mlx(char *str, double offset_x, int fractol)
 {
@@ -38,114 +41,69 @@ t_mlx	*init_mlx(char *str, double offset_x, int fractol)
 	return (tmp);
 }
 
-void	put_pixel(t_mlx *mlx, int x, int y, int n)
+void	*julia(void *img)
 {
-	int i;
-
-	n = n + 0;
-	if (x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT)
-		return ;
-	i = (x * 4) + (y * mlx->stride);
-	mlx->img_ptr[i] = 255 * n;
-	mlx->img_ptr[++i] = 0 + (n * mlx->map->color);
-	mlx->img_ptr[++i] = n % 255;
-}
-
-void*	julia(void *img)
-{
-	t_mlx *mlx;
-	double new_re;
-	double new_im;
-	double old_re;
-	double old_im;
-
-	mlx = (t_mlx *)img;
-	//double new_re, new_im, old_re, old_im;
+	VS;
 	while (mlx->start < mlx->end)
 	{
-		int x = 0;
-		while (x < WIDTH)
+		x = -1;
+		while (++x < WIDTH)
 		{
-			new_re = 1.5 * (x - 650) / (0.125 * mlx->map->zoom * WIDTH) + mlx->map->offset_x;
-			new_im = (mlx->start - 400) / (0.125 * mlx->map->zoom * HEIGHT) + mlx->map->offset_y;
-			int i = 0;
-			while (i < mlx->map->max_iter)
+			c[0] = 1.5 * (x - 640) / (160 * map->zoom) + map->offset_x;
+			c[1] = (mlx->start - 400) / (100 * map->zoom) + map->offset_y;
+			i = -1;
+			while (++i < map->max_iter)
 			{
-				old_re = new_re;
-				old_im = new_im;
-				new_re = old_re * old_re - old_im * old_im + (-0.7 * mlx->mouse_x / 300);
-				if (mlx->map->fractol == 4)
-					new_im = fabs(2 * old_re * old_im) + (0.27015 * mlx->mouse_y / 300);
-				else if (mlx->map->fractol == 2)
-					new_im = 2 * old_re * old_im + (0.27015 * mlx->mouse_y / 300);
-				if ((new_re * new_re + new_im * new_im) > 4)
-					break;
-				i++;
+				c[2] = c[0];
+				c[3] = c[1];
+				c[0] = c[2] * c[2] - c[3] * c[3] + (-0.7 * mlx->mouse_x / 300);
+				map->fractol == 4 ? (c[1] = fabs(2 * c[2] *
+					c[3]) + (0.27015 * mlx->mouse_y / 300)) : (c[1] = 2
+					* c[2] * c[3] + (0.27015 * mlx->mouse_y / 300));
+				if ((c[0] * c[0] + c[1] * c[1]) > 4)
+					break ;
 			}
-			if (i < mlx->map->max_iter)
-				put_pixel(mlx, x, mlx->start, 265 * i);
-			x++;
+			(i < map->max_iter) ? put_pixel(mlx, x, mlx->start, 265 * i) : 0;
 		}
 		mlx->start++;
 	}
 	return (NULL);
 }
 
-
-void* mandelbrot_set(void* img)
+void	*mandelbrot_set(void *img)
 {
-	t_mlx *mlx = (t_mlx *)img;
-	double pr, pi;
-	double new_re, new_im, old_re, old_im;
-	int y = mlx->start;
-	while (y < mlx->end)
+	MS;
+	while (mlx->start < mlx->end && (x = -1))
 	{
-		int x = 0;
-		while (x < WIDTH)
+		while (++x < WIDTH && (i = -1))
 		{
-			pr = 1.5 *(x - WIDTH / 2) / (0.25 * mlx->map->zoom * WIDTH) + mlx->map->offset_x;
-			pi = (y - HEIGHT / 2) / (0.25 * mlx->map->zoom * HEIGHT) + mlx->map->offset_y;
-			new_re = 0;
-			new_im = 0;
-			old_re = 0;
-			old_im = 0;
-			int i = 0;
-			while (i < mlx->map->max_iter)
+			c[0] = 1.5 * (x - 640) / (320 * mlx->map->zoom) +
+				mlx->map->offset_x;
+			c[1] = (mlx->start - 400) / (200 * mlx->map->zoom) +
+				mlx->map->offset_y;
+			INIT;
+			while (++i < mlx->map->max_iter)
 			{
-				old_re = new_re;
-				old_im = new_im;
-				new_re = old_re * old_re - old_im * old_im + pr;
-				if (mlx->map->fractol == 1)
-					new_im = 2 * old_re * old_im + pi;
-				else if (mlx->map->fractol == 3)
-					new_im = 2 * fabs(old_re * old_im) + pi;
-				if ((new_re * new_re + new_im * new_im) > 4)
-					break;
-				i++;
+				c[4] = c[2];
+				c[5] = c[3];
+				c[2] = c[4] * c[4] - c[5] * c[5] + c[0];
+				mlx->map->fractol == 1 ? (c[3] = 2 * c[4] * c[5] + c[1]) :
+					(c[3] = 2 * fabs(c[4] * c[5]) + c[1]);
+				if ((c[2] * c[2] + c[3] * c[3]) > 4)
+					break ;
 			}
-			if (i < mlx->map->max_iter)
-				put_pixel(mlx, x, y, 265 * i);
-			x++;
+			i < mlx->map->max_iter ? put_pixel(mlx, x, mlx->start, 265 * i) : 0;
 		}
-		y++;
+		mlx->start++;
 	}
-	return(NULL);
+	return (NULL);
 }
 
-
-int print()
+void	pthread(t_mlx *mlx)
 {
-	ft_putstr("usage: ./fractol <image>\n\n");
-	ft_putstr("--images:\n\tmandelbrot\n\tjulia\n\tburningship\n\tdulia\n");
-	return (0);
-}
-
-void pthread(t_mlx *mlx)
-{
-	int i;
-	char *str;
-	t_mlx win[4];
-	pthread_t tid[4];
+	int			i;
+	t_mlx		win[4];
+	pthread_t	tid[4];
 
 	ft_bzero(mlx->img_ptr, WIDTH * HEIGHT * mlx->bbp);
 	i = -1;
@@ -155,7 +113,7 @@ void pthread(t_mlx *mlx)
 		win[i].end = (i + 1) * 200;
 	}
 	i = -1;
-	while(++i < 4)
+	while (++i < 4)
 		if (mlx->map->fractol == 1 || mlx->map->fractol == 3)
 			pthread_create(&tid[i], NULL, mandelbrot_set, &win[i]);
 		else if (mlx->map->fractol == 2 || mlx->map->fractol == 4)
@@ -163,30 +121,25 @@ void pthread(t_mlx *mlx)
 	while (--i >= 0)
 		pthread_join(tid[i], NULL);
 	mlx_put_image_to_window(mlx->mlx_ptr, mlx->win_ptr, mlx->img, 0, 0);
-	mlx_string_put(mlx->mlx_ptr, mlx->win_ptr, 10, 10, 0xffffff, "iter:");
-	mlx_string_put(mlx->mlx_ptr, mlx->win_ptr, 110, 10, 0xffffff, str = ft_itoa(mlx->map->max_iter));
-	free(str);
-	mlx_string_put(mlx->mlx_ptr, mlx->win_ptr, 10, 40, 0xffffff, "zoom:");
-	mlx_string_put(mlx->mlx_ptr, mlx->win_ptr, 110, 40, 0xffffff, str = ft_itoa(mlx->map->zoom));
-	free(str);
+	print(1, mlx);
 }
 
-int main(int argc, char **argv)
+int		main(int argc, char **argv)
 {
 	t_mlx	*mlx;
 
 	if (argc != 2)
-		return (print());
-	if ((ft_strcmp(argv[1],"mandelbrot") == 0))
+		return (print(0, mlx = NULL));
+	if ((ft_strcmp(argv[1], "mandelbrot") == 0))
 		mlx = init_mlx(argv[1], 0, 1);
-	else if ((ft_strcmp(argv[1],"julia") == 0))
+	else if ((ft_strcmp(argv[1], "julia") == 0))
 		mlx = init_mlx(argv[1], 0, 2);
-	else if ((ft_strcmp(argv[1],"burningship") == 0))
+	else if ((ft_strcmp(argv[1], "burningship") == 0))
 		mlx = init_mlx(argv[1], 0, 3);
-	else if ((ft_strcmp(argv[1],"dulia") == 0))
+	else if ((ft_strcmp(argv[1], "dulia") == 0))
 		mlx = init_mlx(argv[1], 0, 4);
 	else
-		return (print());
+		return (print(0, mlx = NULL));
 	pthread(mlx);
 	mlx_hook(mlx->win_ptr, 2, 0, key_down, mlx);
 	mlx_hook(mlx->win_ptr, 6, 0, motion_hook, mlx);
